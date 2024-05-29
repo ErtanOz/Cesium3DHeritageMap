@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CesiumJS Projesi</title>
+    <script src="cesium\Source\Cesium.js"></script>
+    <link href="cesium\Source\Widgets\widgets.css" rel="stylesheet">
+    <style>
+        #cesiumContainer {
+            height: 600px;
+            width: 800px;
+        }
+    </style>
+</head>
+<body>
+    <div id="cesiumContainer"></div>
+    <script>
+        const viewer = new Cesium.Viewer('cesiumContainer');
+    </script>
+</body>
+</html>
