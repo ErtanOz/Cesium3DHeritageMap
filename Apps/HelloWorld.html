@@ -28,16 +28,20 @@
   <body>
     <div id="cesiumContainer"></div>
     <script>
-      
-      const viewer = new Cesium.Viewer("cesiumContainer");
+      Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIzNmM0NzI2OC04OWVlLTQ4MDEtYWQ5OS0yZjM2MGFiMzdmMzciLCJpZCI6NzgzODEsImlhdCI6MTcwMTI2MTE0Nn0.U7Gd3QPSDMVZq-eBW_q3m44bxsYkwCr1L737bZdP9W0";
 
-      
+      const viewer = new Cesium.Viewer("cesiumContainer", {
+        baseLayer: Cesium.ImageryLayer.fromWorldImagery({
+          style: Cesium.IonWorldImageryStyle.AERIAL_WITH_LABELS,
+      }),
+      baseLayerPicker: false,
+    });
+
       const latitude = 50.93;
-      const longitude = 13.405;
+      const longitude = 6.96;
 
-      
       viewer.camera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, 1000000.0), 
+        destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, 100000.0), 
       });
     </script>
   </body>
