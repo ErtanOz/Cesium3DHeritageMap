@@ -28,7 +28,17 @@
   <body>
     <div id="cesiumContainer"></div>
     <script>
+      
       const viewer = new Cesium.Viewer("cesiumContainer");
+
+      
+      const latitude = 50.93;
+      const longitude = 13.405;
+
+      
+      viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, 1000000.0), 
+      });
     </script>
   </body>
 </html>
