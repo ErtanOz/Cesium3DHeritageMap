@@ -1,74 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
     />
     <title>Hello World!</title>
     <script src="../Build/CesiumUnminified/Cesium.js"></script>
     <style>
-      @import url(../Build/CesiumUnminified/Widgets/widgets.css);
-      html,
-      body,
-      #cesiumContainer {
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-      }
+        @import url(../Build/CesiumUnminified/Widgets/widgets.css);
+        html,
+        body,
+        #cesiumContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        #optionsBox {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 180px;
+            background-color: rgba(42, 42, 42, 0.8);
+            padding: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+            color: white;
+            z-index: 1;
+            border-radius: 8px;
+        }
+        #optionsBox h2 {
+            font-size: 16px;
+            margin-top: 0;
+        }
+        #optionsBox label {
+            display: block;
+            margin-bottom: 10px;
+        }
     </style>
-  </head>
-  <body>
+</head>
+<body>
+    <div id="optionsBox">
+        <h2>Options</h2>
+        <label>
+            <input type="radio" name="option" id="allMarkers" checked/>
+            All
+        </label>
+        <label>
+            <input type="radio" name="option" id="3dmodel" />
+            3D Model
+        </label>
+        <label>
+            <input type="radio" name="option" id="photo" />
+            Foto
+        </label>
+        <label>
+            <input type="radio" name="option" id="wikipedia" />
+            Wikipedia
+        </label>
+        <label>
+            <input type="radio" name="option" id="openstreetmap" />
+            OpenStreetMap
+        </label>
+    </div>
     <div id="cesiumContainer"></div>
     <script>
-      Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJiMjhiN2RhOC1lYThlLTQ3NGEtYWQ3NC05YjRmOTI5M2M0OWEiLCJpZCI6NzgzODEsImlhdCI6MTcxMDc5ODQ0MH0.nuQD0pwTIy_aHKIqEGLzrhxCCCelkCHyNeJURm3v-Q8";
+        Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJiMjhiN2RhOC1lYThlLTQ3NGEtYWQ3NC05YjRmOTI5M2M0OWEiLCJpZCI6NzgzODEsImlhdCI6MTcxMDc5ODQ0MH0.nuQD0pwTIy_aHKIqEGLzrhxCCCelkCHyNeJURm3v-Q8";
 
-      const viewer = new Cesium.Viewer("cesiumContainer", {
-        baseLayer: Cesium.ImageryLayer.fromWorldImagery({
-          style: Cesium.IonWorldImageryStyle.AERIAL_WITH_LABELS,
-        }),
-        //baseLayerPicker: false, butonları burada kaldır veya ekle yapacağım.
-      });
-
-      const latitude = 50.93;
-      const longitude = 6.96;
-
-      viewer.camera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, 100000.0),
-      });
-
-      // Yerel GeoJSON dosyasını yükleme
-      Cesium.GeoJsonDataSource.load('Data/denkmaeler.json')
-        .then(function(dataSource) {
-          viewer.dataSources.add(dataSource);
-
-          // Yüklü verileri almak ve işaret eklemek için
-          const entities = dataSource.entities.values;
-          entities.forEach(entity => {
-            if (entity.position) {
-              const position = entity.position.getValue(Cesium.JulianDate.now());
-              viewer.entities.add({
-                position: position,
-                billboard: {
-                  image: 'PATH_TO_YOUR_IMAGE.png', // İşaret için kullanılacak görüntü dosyası
-                  width: 32,
-                  height: 32
-                }
-              });
-            }
-          });
-
-          // Kamerayı yüklü verilerin üzerine taşımak için
-          viewer.flyTo(dataSource);
-        })
-        .catch(function(error) {
-          console.error(error);
+        const viewer = new Cesium.Viewer("cesiumContainer", {
+            baseLayer: Cesium.ImageryLayer.fromWorldImagery({
+                style: Cesium.IonWorldImageryStyle.AERIAL_WITH_LABELS,
+            }),
+            baseLayerPicker: false
         });
 
+        const radios = {
+            model3d: document.getElementById('3dmodel'),
+            photo: document.getElementById('photo'),
+            wikipedia: document.getElementById('wikipedia'),
+            openstreetmap: document.getElementById('openstreetmap'),
+            allMarkers: document.getElementById('allMarkers')
+        };
+
+        for (const radioId in radios) {
+            radios[radioId].addEventListener('change', () => {
+                updateEntities(radioId);
+            });
+        }
+
+        function updateEntities(radioId) {
+            const entities = viewer.dataSources.get(0).entities.values;
+
+            entities.forEach(entity => {
+                let isVisible = false;
+
+                switch (radioId) {
+                    case 'model3d':
+                        isVisible = entity.properties.model3d && entity.properties.model3d.getValue() === 'ja';
+                        break;
+                    case 'photo':
+                        isVisible = entity.properties.foto && entity.properties.foto.getValue() === 'ja';
+                        break;
+                    case 'wikipedia':
+                        isVisible = entity.properties.wiki && entity.properties.wiki.getValue() === 'ja';
+                        break;
+                    case 'openstreetmap':
+                        isVisible = entity.properties.osm && entity.properties.osm.getValue() === 'ja';
+                        break;
+                    case 'allMarkers':
+                        isVisible = true; // Tüm işaretleri göster
+                        break;
+                    default:
+                        break;
+                }
+
+                entity.show = isVisible;
+            });
+        }
+
+        const latitude = 50.93;
+        const longitude = 6.96;
+
+        // Kamera ayarları
+        viewer.camera.setView({
+            destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, 100000.0),
+            orientation: {
+                heading: Cesium.Math.toRadians(0.0), // Başlangıç yönü
+                pitch: Cesium.Math.toRadians(-90.0), // Yukarıdan aşağıya bakış
+                roll: 0.0 // Yuvarlanma açısı
+            }
+        });
+
+        // Yerel GeoJSON dosyasını yükleme
+        Cesium.GeoJsonDataSource.load('Data/denkmaeler.json')
+            .then(function(dataSource) {
+                viewer.dataSources.add(dataSource);
+
+                // Yüklü verileri almak ve işaret eklemek için
+                const entities = dataSource.entities.values;
+                entities.forEach(entity => {
+                    if (entity.position) {
+                        const name = entity.properties.kurzbezeichnung ? entity.properties.kurzbezeichnung.getValue() : '';
+
+                        // Varsayılan işaretin özelliklerini güncelleme
+                        entity.billboard.image = 'images/marker.png'; // İşaret için kullanılacak görüntü dosyası
+                        entity.billboard.width = 32;
+                        entity.billboard.height = 32;
+
+                        entity.label = {
+                            text: name,
+                            font: '14pt sans-serif',
+                            fillColor: Cesium.Color.WHITE,
+                            outlineColor: Cesium.Color.BLACK,
+                            outlineWidth: 2,
+                            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                            verticalOrigin: Cesium.VerticalOrigin.BOTTOM, // Label marker'ın üstünde görünsün
+                            pixelOffset: new Cesium.Cartesian2(0, -32) // Label'i biraz yukarı kaydır
+                        };
+                    }
+                });
+
+                // Kamerayı yüklü verilerin üzerine taşımak için
+                viewer.flyTo(dataSource);
+            })
+            .catch(function(error) {
+                console.error(error);
+            });
+
     </script>
-  </body>
+</body>
 </html>
