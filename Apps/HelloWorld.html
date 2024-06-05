@@ -1,11 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!-- Use correct character set. -->
     <meta charset="utf-8" />
-    <!-- Tell IE to use the latest, best version. -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
@@ -28,21 +25,50 @@
   <body>
     <div id="cesiumContainer"></div>
     <script>
-      Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIzNmM0NzI2OC04OWVlLTQ4MDEtYWQ5OS0yZjM2MGFiMzdmMzciLCJpZCI6NzgzODEsImlhdCI6MTcwMTI2MTE0Nn0.U7Gd3QPSDMVZq-eBW_q3m44bxsYkwCr1L737bZdP9W0";
+      Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJiMjhiN2RhOC1lYThlLTQ3NGEtYWQ3NC05YjRmOTI5M2M0OWEiLCJpZCI6NzgzODEsImlhdCI6MTcxMDc5ODQ0MH0.nuQD0pwTIy_aHKIqEGLzrhxCCCelkCHyNeJURm3v-Q8";
 
       const viewer = new Cesium.Viewer("cesiumContainer", {
         baseLayer: Cesium.ImageryLayer.fromWorldImagery({
           style: Cesium.IonWorldImageryStyle.AERIAL_WITH_LABELS,
-      }),
-      baseLayerPicker: false,
-    });
+        }),
+        //baseLayerPicker: false,
+      });
 
       const latitude = 50.93;
       const longitude = 6.96;
 
       viewer.camera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, 100000.0), 
+        destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, 100000.0),
       });
+
+      // Yerel GeoJSON dosyasını yükleme
+      Cesium.GeoJsonDataSource.load('Data/denkmaeler.json')
+        .then(function(dataSource) {
+          viewer.dataSources.add(dataSource);
+
+          // Yüklü verileri almak ve işaret eklemek için
+          const entities = dataSource.entities.values;
+          entities.forEach(entity => {
+            if (entity.position) {
+              const position = entity.position.getValue(Cesium.JulianDate.now());
+              viewer.entities.add({
+                position: position,
+                billboard: {
+                  image: 'PATH_TO_YOUR_IMAGE.png', // İşaret için kullanılacak görüntü dosyası
+                  width: 32,
+                  height: 32
+                }
+              });
+            }
+          });
+
+          // Kamerayı yüklü verilerin üzerine taşımak için
+          viewer.flyTo(dataSource);
+        })
+        .catch(function(error) {
+          console.error(error);
+        });
+
     </script>
   </body>
 </html>
