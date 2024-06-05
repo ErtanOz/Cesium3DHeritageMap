@@ -74,7 +74,7 @@
             baseLayer: Cesium.ImageryLayer.fromWorldImagery({
                 style: Cesium.IonWorldImageryStyle.AERIAL_WITH_LABELS,
             }),
-            baseLayerPicker: false
+            // baseLayerPicker: false baselayer butonunu kapatan fonksiyon
         });
 
         const radios = {
@@ -120,13 +120,33 @@
                 entity.show = isVisible;
             });
         }
-
+        
         const latitude = 50.93;
         const longitude = 6.96;
 
+        // Yeni başlangıç konumu tanımlama
+        const newHomeLocation = Cesium.Cartesian3.fromDegrees(longitude, latitude, 100000);
+
+        // "View Home" butonuna tıklandığında yeni konuma gitme işlemi
+        viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function() {
+            // Yeni başlangıç konumuna gitme animasyonu
+            viewer.camera.flyTo({
+                destination: newHomeLocation,
+                orientation: {
+                    heading: Cesium.Math.toRadians(0), // Yeni yön
+                    pitch: Cesium.Math.toRadians(-90), // Yeni eğim
+                    roll: Cesium.Math.toRadians(0) // Yeni yuvarlanma
+                },
+                duration: 2 // Animasyon süresi (saniye cinsinden)
+            });
+
+            // Butonun varsayılan davranışını iptal etme
+            return Cesium.when.resolve(true);
+        });
+
         // Kamera ayarları
         viewer.camera.setView({
-            destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, 100000.0),
+            destination: newHomeLocation,
             orientation: {
                 heading: Cesium.Math.toRadians(0.0), // Başlangıç yönü
                 pitch: Cesium.Math.toRadians(-90.0), // Yukarıdan aşağıya bakış
