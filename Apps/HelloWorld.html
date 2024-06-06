@@ -3,24 +3,22 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
     <title>Cesium3D Heritage Map</title>
-    <script src="../Build/CesiumUnminified/Cesium.js"></script>
+    <!-- Cesium JS ve CSS dosyalarını dahil ediyoruz -->
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.83/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.83/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
     <style>
-        @import url(../Build/CesiumUnminified/Widgets/widgets.css);
-        html,
-        body,
-        #cesiumContainer {
+        /* HTML, body ve Cesium Container'ı tam ekran yap */
+        html, body, #cesiumContainer {
             width: 100%;
             height: 100%;
             margin: 0;
             padding: 0;
             overflow: hidden;
         }
-        
+
+        /* Seçenek kutusu stil tanımlamaları */
         #optionsBox {
             position: absolute;
             top: 10px;
@@ -30,10 +28,11 @@
             padding: 10px;
             box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
             color: white;
-            display: none; /* Başlangıçta gizli */
+            display: none;
             z-index: 1;
             border-radius: 8px;
         }
+
         #closeOptionsBox {
             position: absolute;
             top: 5px;
@@ -45,6 +44,7 @@
             border-radius: 4px;
             padding: 2px 5px;
         }
+
         #openOptionsBox {
             position: absolute;
             top: 10px;
@@ -54,24 +54,28 @@
             border: none;
             color: white;
             border-radius: 4px;
-            padding: 5px 5px;        
+            padding: 5px 5px;
             z-index: 1;
         }
+
         #openOptionsBox:hover {
             background-color: rgb(37, 150, 190);
             border-style: solid;
             border: 2px;
             border-color: white;
         }
+
         #optionsBox h2 {
             font-size: 16px;
             margin-top: 0;
         }
+
         #optionsBox label {
             display: block;
             margin-bottom: 10px;
         }
 
+        /* Bilgi kutusu stil tanımlamaları */
         #infoBox {
             position: absolute;
             top: 50px;
@@ -81,20 +85,24 @@
             padding: 10px;
             box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
             color: white;
-            display: none; /* Başlangıçta gizli */
+            display: none;
             z-index: 1;
             border-radius: 8px;
         }
+
         #infoBox h2 {
             font-size: 16px;
             margin-top: 0;
         }
+
         #infoBox .info-item {
             margin-bottom: 10px;
         }
+
         #infoBox .info-item button {
             margin-top: 5px;
         }
+
         #closeInfoBox {
             position: absolute;
             top: 5px;
@@ -106,6 +114,7 @@
             border-radius: 4px;
             padding: 2px 5px;
         }
+
         #openInfoBox {
             position: absolute;
             top: 50px;
@@ -118,20 +127,21 @@
             padding: 1px 1px;
             z-index: 1;
         }
+
         #openInfoBox:hover {
             background-color: rgb(37, 150, 190);
             border-style: solid;
             border: 2px;
             border-color: white;
         }
-
     </style>
 </head>
 <body>
+    <!-- Seçenek kutusu -->
     <div id="optionsBox">
         <h2>Options</h2>
         <label>
-            <input type="radio" name="option" id="allMarkers" checked/>
+            <input type="radio" name="option" id="allMarkers" checked />
             All
         </label>
         <label>
@@ -152,26 +162,38 @@
         </label>
         <button id="closeOptionsBox">X</button>
     </div>
+    <!-- Seçenek kutusu açma düğmesi -->
     <button id="openOptionsBox"><img src="Images/menu.png" alt="menuicon"></button>
-    
+
+    <!-- Cesium Container -->
     <div id="cesiumContainer"></div>
 
+    <!-- Bilgi kutusu -->
     <div id="infoBox">
         <button id="closeInfoBox">X</button>
         <h2>Yer İşareti Bilgisi</h2>
         <div id="infoContent"></div>
     </div>
+    <!-- Bilgi kutusu açma düğmesi -->
     <button id="openInfoBox"><img src="images/infoicon.png" alt="infoicon"></button>
     <script>
+        // Cesium Ion erişim tokeni
         Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJiMjhiN2RhOC1lYThlLTQ3NGEtYWQ3NC05YjRmOTI5M2M0OWEiLCJpZCI6NzgzODEsImlhdCI6MTcxMDc5ODQ0MH0.nuQD0pwTIy_aHKIqEGLzrhxCCCelkCHyNeJURm3v-Q8";
 
+        // Cesium Viewer oluşturma
         const viewer = new Cesium.Viewer("cesiumContainer", {
-            baseLayer: Cesium.ImageryLayer.fromWorldImagery({
-                style: Cesium.IonWorldImageryStyle.AERIAL_WITH_LABELS,
+            terrainProvider: Cesium.createWorldTerrain(),
+            imageryProvider: new Cesium.OpenStreetMapImageryProvider({
+                url : 'https://a.tile.openstreetmap.org/'
             }),
-            //baseLayerPicker: false baselayer butonunu kapatan fonksiyon
+            baseLayerPicker: false, // BaseLayerPicker'ı devre dışı bırak
+            sceneModePicker: false // Scene mode picker'ı kapatmak için
         });
 
+        // 3D ışıklandırma etkinleştirme
+        viewer.scene.globe.enableLighting = true;
+
+        // Radyo butonlarını tanımlama
         const radios = {
             model3d: document.getElementById('3dmodel'),
             photo: document.getElementById('photo'),
@@ -180,12 +202,14 @@
             allMarkers: document.getElementById('allMarkers')
         };
 
+        // Radyo butonları için event listener ekleme
         for (const radioId in radios) {
             radios[radioId].addEventListener('change', () => {
                 updateEntities(radioId);
             });
         }
 
+        // Varlıkları güncelleme fonksiyonu
         function updateEntities(radioId) {
             const entities = viewer.dataSources.get(0).entities.values;
 
@@ -216,46 +240,42 @@
             });
         }
 
-        const latitude = 50.93;
-        const longitude = 6.96;
-        const newHomeLocation = Cesium.Cartesian3.fromDegrees(longitude, latitude, 100000);
+        // Home butonu için yeni konum ayarlama
+        const newHomeLocation = new Cesium.Cartesian3(4049031.6615590854, 494694.75900322065, 4935825.152304239);
 
+        // Home butonuna tıklama olayı ekleme
         viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function() {
             viewer.camera.flyTo({
                 destination: newHomeLocation,
                 orientation: {
-                    heading: Cesium.Math.toRadians(0),
-                    pitch: Cesium.Math.toRadians(-90),
-                    roll: Cesium.Math.toRadians(0)
+                    heading: Cesium.Math.toRadians(6.283185307179586),
+                    pitch: Cesium.Math.toRadians(-1.5685397851648877),
+                    roll: 0
                 },
-                duration: 2
+                duration: 3
             });
-            return Cesium.when.resolve(true);
         });
 
-        viewer.camera.setView({
-            destination: newHomeLocation,
-            orientation: {
-                heading: Cesium.Math.toRadians(0.0),
-                pitch: Cesium.Math.toRadians(-90.0),
-                roll: 0.0
-            }
-        });
+        // GeoJSON verisini yükleme fonksiyonu
+        async function loadGeoJson() {
+            try {
+                const dataSource = await Cesium.GeoJsonDataSource.load('Data/denkmaeler.json');
+                await viewer.dataSources.add(dataSource);
 
-        Cesium.GeoJsonDataSource.load('Data/denkmaeler.json')
-            .then(function(dataSource) {
-                viewer.dataSources.add(dataSource);
                 const entities = dataSource.entities.values;
 
                 entities.forEach(entity => {
                     if (entity.position) {
                         const name = entity.properties.kurzbezeichnung ? entity.properties.kurzbezeichnung.getValue() : '';
                         
-                        entity.billboard.image = 'images/marker.png';
-                        entity.billboard.width = 32;
-                        entity.billboard.height = 32;
+                        entity.billboard = new Cesium.BillboardGraphics({
+                            image: 'images/marker.png',
+                            width: 32,
+                            height: 32,
+                            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND                       
+                        });
 
-                        entity.label = {
+                        entity.label = new Cesium.LabelGraphics({
                             text: name,
                             font: '14pt sans-serif',
                             fillColor: Cesium.Color.WHITE,
@@ -263,17 +283,41 @@
                             outlineWidth: 2,
                             style: Cesium.LabelStyle.FILL_AND_OUTLINE,
                             verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-                            pixelOffset: new Cesium.Cartesian2(0, -32)
-                        };
+                            pixelOffset: new Cesium.Cartesian2(0, -32),
+                            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
+                        });
+
+                        // Zoom seviyesine göre etiketleri ayarlama
+                        viewer.scene.preRender.addEventListener(function() {
+                            var zoomThreshold = 5000;
+                            var currentZoom = viewer.camera.zoomFactor;
+                            if (currentZoom < zoomThreshold) {
+                                entity.billboard.pixelOffset = new Cesium.Cartesian2(0, -32);
+                            } else {
+                                entity.billboard.pixelOffset = new Cesium.Cartesian2(0, -16);
+                            }
+                        });
                     }
                 });
 
                 viewer.flyTo(dataSource);
-            })
-            .catch(function(error) {
+            } catch (error) {
                 console.error(error);
-            });
+            }
+        }
 
+        // GeoJSON verisini yükle
+        loadGeoJson();
+
+        // 3D Tileset'leri yükleme ve ekleme
+        const tileset = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+            url: Cesium.IonResource.fromAssetId(96188),
+        }));
+        const koln_sudstadt_diana_antilope = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+            url: Cesium.IonResource.fromAssetId(2255119), 
+        }));
+
+        // Haritaya tıklama olayı için event listener ekleme
         viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(movement) {
             const pickedObject = viewer.scene.pick(movement.position);
             if (Cesium.defined(pickedObject) && Cesium.defined(pickedObject.id)) {
@@ -284,11 +328,12 @@
             }
         }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
+        // Seçilen varlık bilgisini gösterme fonksiyonu
         function showEntityInfo(entity) {
             const infoBox = document.getElementById('infoContent');
             infoBox.innerHTML = '';
 
-            const propertiesToShow = ['denkmallistennummer','kategorie','kurzbezeichnung', 'baujahr', ];
+            const propertiesToShow = ['denkmallistennummer', 'kategorie', 'kurzbezeichnung', 'baujahr'];
             propertiesToShow.forEach(property => {
                 if (entity.properties[property]) {
                     const value = entity.properties[property].getValue();
@@ -317,22 +362,47 @@
                 }
             });
         }
-        //InfoBox close and open
+
+        // İşaretçiye çift tıklama olayı (Yapılacak)
+        viewer.screenSpaceEventHandler.setInputAction(function onDoubleClick(movement) {    
+            const pickedObject = viewer.scene.pick(movement.position);
+            if (Cesium.defined(pickedObject) && Cesium.defined(pickedObject.id)) {
+                const entity = pickedObject.id;
+                const markerPosition = entity.position.getValue();
+
+        // Kamera animasyonu oluştur ve belirli bir yüksekliğe uygula
+                viewer.camera.flyTo({
+                    destination: markerPosition,
+                    orientation: {
+                        heading: Cesium.Math.toRadians(0.0),
+                        pitch: Cesium.Math.toRadians(-60.0), // Yüksekliği ayarlayabilirsiniz
+                        roll: 0.0
+                    },
+                    duration: 3 // Animasyon süresini de belirleyebilirsiniz
+                });
+            }
+        }, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+
+
+        // Bilgi kutusunu kapatma düğmesine olay ekleme
         document.getElementById('closeInfoBox').onclick = () => {
             document.getElementById('infoBox').style.display = 'none';
             document.getElementById('openInfoBox').style.display = 'block';
         };
 
+        // Bilgi kutusunu açma düğmesine olay ekleme
         document.getElementById('openInfoBox').onclick = () => {
             document.getElementById('infoBox').style.display = 'block';
             document.getElementById('openInfoBox').style.display = 'none';
         };
-        //OptionBox close and open
+
+        // Seçenek kutusunu kapatma düğmesine olay ekleme
         document.getElementById('closeOptionsBox').onclick = () => {
             document.getElementById('optionsBox').style.display = 'none';
             document.getElementById('openOptionsBox').style.display = 'block';
         };
 
+        // Seçenek kutusunu açma düğmesine olay ekleme
         document.getElementById('openOptionsBox').onclick = () => {
             document.getElementById('optionsBox').style.display = 'block';
             document.getElementById('openOptionsBox').style.display = 'none';
