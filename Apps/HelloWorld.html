@@ -7,7 +7,7 @@
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
     />
-    <title>Hello World!</title>
+    <title>Cesium3D Heritage Map</title>
     <script src="../Build/CesiumUnminified/Cesium.js"></script>
     <style>
         @import url(../Build/CesiumUnminified/Widgets/widgets.css);
@@ -20,6 +20,7 @@
             padding: 0;
             overflow: hidden;
         }
+        
         #optionsBox {
             position: absolute;
             top: 10px;
@@ -29,8 +30,38 @@
             padding: 10px;
             box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
             color: white;
+            display: none; /* Başlangıçta gizli */
             z-index: 1;
             border-radius: 8px;
+        }
+        #closeOptionsBox {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            cursor: pointer;
+            background-color: rgba(255, 0, 0, 0.8);
+            border: none;
+            color: white;
+            border-radius: 4px;
+            padding: 2px 5px;
+        }
+        #openOptionsBox {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            cursor: pointer;
+            background-color: rgba(42, 42, 42, 0.8);
+            border: none;
+            color: white;
+            border-radius: 4px;
+            padding: 5px 5px;        
+            z-index: 1;
+        }
+        #openOptionsBox:hover {
+            background-color: rgb(37, 150, 190);
+            border-style: solid;
+            border: 2px;
+            border-color: white;
         }
         #optionsBox h2 {
             font-size: 16px;
@@ -40,6 +71,60 @@
             display: block;
             margin-bottom: 10px;
         }
+
+        #infoBox {
+            position: absolute;
+            top: 50px;
+            right: 10px;
+            width: 300px;
+            background-color: rgba(42, 42, 42, 0.8);
+            padding: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+            color: white;
+            display: none; /* Başlangıçta gizli */
+            z-index: 1;
+            border-radius: 8px;
+        }
+        #infoBox h2 {
+            font-size: 16px;
+            margin-top: 0;
+        }
+        #infoBox .info-item {
+            margin-bottom: 10px;
+        }
+        #infoBox .info-item button {
+            margin-top: 5px;
+        }
+        #closeInfoBox {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            cursor: pointer;
+            background-color: rgba(255, 0, 0, 0.8);
+            border: none;
+            color: white;
+            border-radius: 4px;
+            padding: 2px 5px;
+        }
+        #openInfoBox {
+            position: absolute;
+            top: 50px;
+            right: 10px;
+            cursor: pointer;
+            background-color: rgba(42, 42, 42, 0.8);
+            border: none;
+            color: white;
+            border-radius: 4px;
+            padding: 1px 1px;
+            z-index: 1;
+        }
+        #openInfoBox:hover {
+            background-color: rgb(37, 150, 190);
+            border-style: solid;
+            border: 2px;
+            border-color: white;
+        }
+
     </style>
 </head>
 <body>
@@ -65,8 +150,18 @@
             <input type="radio" name="option" id="openstreetmap" />
             OpenStreetMap
         </label>
+        <button id="closeOptionsBox">X</button>
     </div>
+    <button id="openOptionsBox"><img src="Images/menu.png" alt="menuicon"></button>
+    
     <div id="cesiumContainer"></div>
+
+    <div id="infoBox">
+        <button id="closeInfoBox">X</button>
+        <h2>Yer İşareti Bilgisi</h2>
+        <div id="infoContent"></div>
+    </div>
+    <button id="openInfoBox"><img src="images/infoicon.png" alt="infoicon"></button>
     <script>
         Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJiMjhiN2RhOC1lYThlLTQ3NGEtYWQ3NC05YjRmOTI5M2M0OWEiLCJpZCI6NzgzODEsImlhdCI6MTcxMDc5ODQ0MH0.nuQD0pwTIy_aHKIqEGLzrhxCCCelkCHyNeJURm3v-Q8";
 
@@ -74,7 +169,7 @@
             baseLayer: Cesium.ImageryLayer.fromWorldImagery({
                 style: Cesium.IonWorldImageryStyle.AERIAL_WITH_LABELS,
             }),
-            // baseLayerPicker: false baselayer butonunu kapatan fonksiyon
+            //baseLayerPicker: false baselayer butonunu kapatan fonksiyon
         });
 
         const radios = {
@@ -120,53 +215,43 @@
                 entity.show = isVisible;
             });
         }
-        
+
         const latitude = 50.93;
         const longitude = 6.96;
-
-        // Yeni başlangıç konumu tanımlama
         const newHomeLocation = Cesium.Cartesian3.fromDegrees(longitude, latitude, 100000);
 
-        // "View Home" butonuna tıklandığında yeni konuma gitme işlemi
         viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function() {
-            // Yeni başlangıç konumuna gitme animasyonu
             viewer.camera.flyTo({
                 destination: newHomeLocation,
                 orientation: {
-                    heading: Cesium.Math.toRadians(0), // Yeni yön
-                    pitch: Cesium.Math.toRadians(-90), // Yeni eğim
-                    roll: Cesium.Math.toRadians(0) // Yeni yuvarlanma
+                    heading: Cesium.Math.toRadians(0),
+                    pitch: Cesium.Math.toRadians(-90),
+                    roll: Cesium.Math.toRadians(0)
                 },
-                duration: 2 // Animasyon süresi (saniye cinsinden)
+                duration: 2
             });
-
-            // Butonun varsayılan davranışını iptal etme
             return Cesium.when.resolve(true);
         });
 
-        // Kamera ayarları
         viewer.camera.setView({
             destination: newHomeLocation,
             orientation: {
-                heading: Cesium.Math.toRadians(0.0), // Başlangıç yönü
-                pitch: Cesium.Math.toRadians(-90.0), // Yukarıdan aşağıya bakış
-                roll: 0.0 // Yuvarlanma açısı
+                heading: Cesium.Math.toRadians(0.0),
+                pitch: Cesium.Math.toRadians(-90.0),
+                roll: 0.0
             }
         });
 
-        // Yerel GeoJSON dosyasını yükleme
         Cesium.GeoJsonDataSource.load('Data/denkmaeler.json')
             .then(function(dataSource) {
                 viewer.dataSources.add(dataSource);
-
-                // Yüklü verileri almak ve işaret eklemek için
                 const entities = dataSource.entities.values;
+
                 entities.forEach(entity => {
                     if (entity.position) {
                         const name = entity.properties.kurzbezeichnung ? entity.properties.kurzbezeichnung.getValue() : '';
-
-                        // Varsayılan işaretin özelliklerini güncelleme
-                        entity.billboard.image = 'images/marker.png'; // İşaret için kullanılacak görüntü dosyası
+                        
+                        entity.billboard.image = 'images/marker.png';
                         entity.billboard.width = 32;
                         entity.billboard.height = 32;
 
@@ -177,19 +262,81 @@
                             outlineColor: Cesium.Color.BLACK,
                             outlineWidth: 2,
                             style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                            verticalOrigin: Cesium.VerticalOrigin.BOTTOM, // Label marker'ın üstünde görünsün
-                            pixelOffset: new Cesium.Cartesian2(0, -32) // Label'i biraz yukarı kaydır
+                            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                            pixelOffset: new Cesium.Cartesian2(0, -32)
                         };
                     }
                 });
 
-                // Kamerayı yüklü verilerin üzerine taşımak için
                 viewer.flyTo(dataSource);
             })
             .catch(function(error) {
                 console.error(error);
             });
 
+        viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(movement) {
+            const pickedObject = viewer.scene.pick(movement.position);
+            if (Cesium.defined(pickedObject) && Cesium.defined(pickedObject.id)) {
+                const entity = pickedObject.id;
+                showEntityInfo(entity);
+                document.getElementById('infoBox').style.display = 'block';
+                document.getElementById('openInfoBox').style.display = 'none';
+            }
+        }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+        function showEntityInfo(entity) {
+            const infoBox = document.getElementById('infoContent');
+            infoBox.innerHTML = '';
+
+            const propertiesToShow = ['denkmallistennummer','kategorie','kurzbezeichnung', 'baujahr', ];
+            propertiesToShow.forEach(property => {
+                if (entity.properties[property]) {
+                    const value = entity.properties[property].getValue();
+                    const div = document.createElement('div');
+                    div.className = 'info-item';
+                    div.innerHTML = `<strong>${property}:</strong> ${value}`;
+                    infoBox.appendChild(div);
+                }
+            });
+
+            const controls = [
+                { prop: 'wiki', urlProp: 'wikiurl', label: 'Wikipedia' },
+                { prop: 'model3d', urlProp: 'model3durl', label: '3D Model' },
+                { prop: 'foto', urlProp: 'fotourl', label: 'Foto' },
+                { prop: 'osm', urlProp: 'osmurl', label: 'OpenStreetMap' }
+            ];
+
+            controls.forEach(control => {
+                if (entity.properties[control.prop] && entity.properties[control.prop].getValue() === 'ja') {
+                    const button = document.createElement('button');
+                    button.innerHTML = control.label;
+                    button.onclick = () => {
+                        window.open(entity.properties[control.urlProp].getValue(), '_blank');
+                    };
+                    infoBox.appendChild(button);
+                }
+            });
+        }
+        //InfoBox close and open
+        document.getElementById('closeInfoBox').onclick = () => {
+            document.getElementById('infoBox').style.display = 'none';
+            document.getElementById('openInfoBox').style.display = 'block';
+        };
+
+        document.getElementById('openInfoBox').onclick = () => {
+            document.getElementById('infoBox').style.display = 'block';
+            document.getElementById('openInfoBox').style.display = 'none';
+        };
+        //OptionBox close and open
+        document.getElementById('closeOptionsBox').onclick = () => {
+            document.getElementById('optionsBox').style.display = 'none';
+            document.getElementById('openOptionsBox').style.display = 'block';
+        };
+
+        document.getElementById('openOptionsBox').onclick = () => {
+            document.getElementById('optionsBox').style.display = 'block';
+            document.getElementById('openOptionsBox').style.display = 'none';
+        };
     </script>
 </body>
 </html>
