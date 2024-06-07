@@ -1,0 +1,120 @@
+header {
+    background-color: #f8f8f8;
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+#search-and-filter {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px; /* Add some space between the search bar and the filter */
+    flex-wrap: wrap; /* Ensures that it wraps on small screens */
+}
+
+#search-bar, #filter-bar {
+    margin: 10px 0;
+}
+
+#search-input {
+    padding: 10px;
+    font-size: 16px;
+    width: 300px; /* Increase this value to make the search bar wider */
+}
+
+#category-filter, #search-button {
+    padding: 10px;
+    font-size: 16px;
+}
+
+#search-button {
+    cursor: pointer;
+}
+
+main {
+    padding: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: #f4f4f4;
+    cursor: pointer;
+}
+
+td img {
+    max-width: 100px;
+    height: auto;
+}
+
+td a {
+    display: inline-block;
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+td a:hover {
+    background-color: #0056b3;
+}
+
+.sort-asc::after {
+    content: ' \u25B2'; /* Yukarı bakan ok */
+}
+
+.sort-desc::after {
+    content: ' \u25BC'; /* Aşağı bakan ok */
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.modal-content {
+    position: relative;
+    margin: auto;
+    padding: 20px;
+    width: 80%;
+    max-width: 800px;
+    background-color: #fff;
+    border-radius: 8px;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 25px;
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}

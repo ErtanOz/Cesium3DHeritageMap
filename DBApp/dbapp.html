@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anıt Veritabanı</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+        <!-- Modal Structure -->
+        <div id="modal" class="modal">
+            <span class="close">&times;</span>
+            <div class="modal-content" id="modal-content"></div>
+        </div>
+
+    <header>
+        <h1>Heritage List</h1>
+    <div id="search-and-filter">
+        <div id="search-bar">
+            <input type="text" id="search-input" placeholder="Suche nach Nummer der Denkmalliste oder Kurzbeschreibung...">
+            <button id="search-button">Suche</button>
+        </div>
+        <div id="filter-bar">
+            <select id="category-filter">
+                <option value="">Nach Kategorie Filtern</option>
+            </select>
+        </div>
+    </div>
+    </header>
+    
+    <main>
+        <table id="results-table">
+            <thead>
+                <tr>
+                    <th id="th-denkmallistennummer">Nummer der Denkmalliste</th>
+                    <th>Foto</th>
+                    <th id="th-kurzbezeichnung">Kurzbeschreibung</th>
+                    <th>Kategorie</th>
+                    <th id="th-baujahr">Baujahr</th>
+                    <th id="th-unterschutzstellung">Unterschutzstellung</th>
+                    <th>Karte Standort</th>
+                    <th>3D Modell</th>
+                    <th>Wiki</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- JSON verileri buraya yüklenecek -->
+            </tbody>
+        </table>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>
