@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
     <title>Cesium3D Heritage Map</title>
     <!-- Cesium JS ve CSS dosyalarını dahil ediyoruz -->
     <script src="https://cesium.com/downloads/cesiumjs/releases/1.83/Build/Cesium/Cesium.js"></script>
     <link href="https://cesium.com/downloads/cesiumjs/releases/1.83/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
     <style>
         /* HTML, body ve Cesium Container'ı tam ekran yap */
-        html, body, #cesiumContainer {
+        html,
+        body,
+        #cesiumContainer {
             width: 100%;
             height: 100%;
             margin: 0;
@@ -136,6 +140,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Seçenek kutusu -->
     <div id="optionsBox">
@@ -184,7 +189,7 @@
         const viewer = new Cesium.Viewer("cesiumContainer", {
             terrainProvider: Cesium.createWorldTerrain(),
             imageryProvider: new Cesium.OpenStreetMapImageryProvider({
-                url : 'https://a.tile.openstreetmap.org/'
+                url: 'https://a.tile.openstreetmap.org/'
             }),
             baseLayerPicker: true, // BaseLayerPicker'ı devre dışı bırak
             sceneModePicker: false // Scene mode picker'ı kapatmak için
@@ -241,10 +246,11 @@
         }
 
         // Home butonu için yeni konum ayarlama
+
         const newHomeLocation = new Cesium.Cartesian3(4049031.6615590854, 494694.75900322065, 4935825.152304239);
 
         // Home butonuna tıklama olayı ekleme
-        viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function() {
+        viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function () {
             viewer.camera.flyTo({
                 destination: newHomeLocation,
                 orientation: {
@@ -255,6 +261,18 @@
                 duration: 3
             });
         });
+
+        // Function to get URL parameters
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        // Get lat and lon parameters
+        var lat = getUrlParameter('lat');
+        var lon = getUrlParameter('lon');
 
         // GeoJSON verisini yükleme fonksiyonu
         async function loadGeoJson() {
@@ -267,12 +285,12 @@
                 entities.forEach(entity => {
                     if (entity.position) {
                         const name = entity.properties.kurzbezeichnung ? entity.properties.kurzbezeichnung.getValue() : '';
-                        
+
                         entity.billboard = new Cesium.BillboardGraphics({
                             image: 'Images/marker.png',
                             width: 32,
                             height: 32,
-                            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND                       
+                            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
                         });
 
                         entity.label = new Cesium.LabelGraphics({
@@ -288,7 +306,7 @@
                         });
 
                         // Zoom seviyesine göre etiketleri ayarlama
-                        viewer.scene.preRender.addEventListener(function() {
+                        viewer.scene.preRender.addEventListener(function () {
                             var zoomThreshold = 5000;
                             var currentZoom = viewer.camera.zoomFactor;
                             if (currentZoom < zoomThreshold) {
@@ -300,7 +318,20 @@
                     }
                 });
 
-                viewer.flyTo(dataSource);
+                // zoom to lat lon parameters
+                // example: ?lon=6.947531&lat=50.926031  --> Diana mit springender Antilope
+                if (lat && lon) {
+                    viewer.camera.setView({
+                        destination: Cesium.Cartesian3.fromDegrees(parseFloat(lon), parseFloat(lat - 0.001), 200),
+                        orientation: {
+                            heading: Cesium.Math.toRadians(0.0),
+                            pitch: Cesium.Math.toRadians(-45.0),
+                            roll: 0
+                        }
+                    });
+                } else {
+                    viewer.flyTo(dataSource);
+                }
             } catch (error) {
                 console.error(error);
             }
@@ -314,9 +345,9 @@
             url: Cesium.IonResource.fromAssetId(96188),
         }));
         const koln_sudstadt_diana_antilope = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
-            url: Cesium.IonResource.fromAssetId(2255119), 
+            url: Cesium.IonResource.fromAssetId(2255119),
         }));
-       
+
         // Haritaya tıklama olayı için event listener ekleme
         viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(movement) {
             const pickedObject = viewer.scene.pick(movement.position);
@@ -364,13 +395,13 @@
         }
 
         // İşaretçiye çift tıklama olayı (Yapılacak)
-        viewer.screenSpaceEventHandler.setInputAction(function onDoubleClick(movement) {    
+        viewer.screenSpaceEventHandler.setInputAction(function onDoubleClick(movement) {
             const pickedObject = viewer.scene.pick(movement.position);
             if (Cesium.defined(pickedObject) && Cesium.defined(pickedObject.id)) {
                 const entity = pickedObject.id;
                 const markerPosition = entity.position.getValue();
 
-        // Kamera animasyonu oluştur ve belirli bir yüksekliğe uygula
+                // Kamera animasyonu oluştur ve belirli bir yüksekliğe uygula
                 viewer.camera.flyTo({
                     destination: markerPosition,
                     orientation: {
@@ -409,4 +440,5 @@
         };
     </script>
 </body>
+
 </html>
